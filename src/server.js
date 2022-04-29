@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
+
 import routers from './routers';
 
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
@@ -24,10 +25,17 @@ app.use(express.json()); // To parse the incoming requests with JSON payloads
 
 // additional init stuff should go before hitting the routing
 
+// database setup
+const mongoose = require('mongoose');
+
+const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:9090';
+mongoose.connect(mongoURI, { useNewUrlParser: true });
+
 // default index route
 app.get('/', (req, res) => {
-  res.send('hi');
+  res.send('Welcome to LearnVerse');
 });
+
 // prefix api endpoints
 Object.keys(routers).forEach((prefix) => {
   app.use(`/${prefix}`, routers[prefix]);
@@ -38,4 +46,4 @@ Object.keys(routers).forEach((prefix) => {
 const port = process.env.PORT || 9090;
 app.listen(port);
 
-console.log(`listening on: ${port}`);
+console.log(`\nlistening on port ${port}`);

@@ -4,6 +4,7 @@ import { RESPONSE_CODES } from '../constants';
 const getServers = async () => {
   try {
     const servers = await Server.find();
+    console.log(servers);
     if (servers) return servers;
     const error = new Error('Not found');
     error.code = RESPONSE_CODES.NOT_FOUND;
@@ -14,4 +15,6 @@ const getServers = async () => {
   }
 };
 
-export default getServers;
+const server = { getServers };
+
+export default server;

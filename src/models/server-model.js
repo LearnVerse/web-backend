@@ -1,6 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
-const ServerScheme = new Schema({
+const { Schema } = mongoose;
+
+const ServerSchema = new Schema({
   address: String,
   game: String,
   max_users: Number,
@@ -11,6 +13,6 @@ const ServerScheme = new Schema({
   },
 });
 
-const ServerModel = mongoose.model('Server', ServerScheme);
+const ServerModel = mongoose.model('Server', ServerSchema);
 
 export default ServerModel;

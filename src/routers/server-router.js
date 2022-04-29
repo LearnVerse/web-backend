@@ -1,5 +1,5 @@
 import express from 'express';
-import * as Server from '../controllers/server-controller';
+import Server from '../controllers/server-controller';
 import { generateResponse, RESPONSE_TYPES } from '../constants';
 
 const router = express();
