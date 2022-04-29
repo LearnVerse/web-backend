@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
+import routers from './routers';
+
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // initialize
 const app = express();
@@ -24,6 +27,10 @@ app.use(express.json()); // To parse the incoming requests with JSON payloads
 // default index route
 app.get('/', (req, res) => {
   res.send('hi');
+});
+// prefix api endpoints
+Object.keys(routers).forEach((prefix) => {
+  app.use(`/${prefix}`, routers[prefix]);
 });
 
 // START THE SERVER
