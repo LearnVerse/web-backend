@@ -5,8 +5,11 @@ const { Schema } = mongoose;
 const ServerSchema = new Schema({
   address: String,
   game: String,
-  max_users: Number,
-  curr_users: Number,
+  maxUsers: Number,
+  currUsers: Number,
+  partyCode: String,
+  instructor: mongoose.Schema.Types.ObjectId,
+  students: Array,
 }, {
   toJSON: {
     virtuals: true,
