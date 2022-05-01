@@ -6,8 +6,7 @@ import {
 } from '../constants';
 
 /**
- * Create a party object in the database, assign it an instructor, allocate servers for the party, and
- * return the party's id
+ * Create party and instructor objects in the database, assign them to each other, and allocate servers for the party
  * @param name {string} - the name of the instructor
  * @param game {string} - the game the party is playing
  * @param numPlayers {number} - the number of players in the party, must be an integer
@@ -64,8 +63,7 @@ const createParty = async (name, game, numPlayers) => {
 };
 
 /**
- * Creates a new student object in the database, assigns the student to a server, and adds the student
- * to the party
+ * Create a student object in the database, assign it to a server, and add the student to the party
  * @param name {string} - the name of the student
  * @param partyCode {string} - the party code that the student is trying to join
  * @returns address of server student was assigned to
