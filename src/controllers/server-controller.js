@@ -14,6 +14,9 @@ import {
  */
 const createParty = async (name, game, numPlayers) => {
   try {
+    // verify that call includes all parameters
+    if (!name || !game || !numPlayers) { throw generateError('Please specify a name, game, and number of players', RESPONSE_CODES.BAD_REQUEST); }
+
     // create object for instructor in db
     const instructor = new User({
       name,
@@ -23,7 +26,6 @@ const createParty = async (name, game, numPlayers) => {
       allPartyAddresses: [],
     });
     if (!instructor) { throw generateError('Couldn\'t create object for instructor', RESPONSE_CODES.NOT_FOUND); }
-    instructor.save();
 
     // create object for party in db, assign instructor
     const party = new Party({
@@ -31,7 +33,6 @@ const createParty = async (name, game, numPlayers) => {
       students: [],
     });
     if (!party) { throw generateError('Couldn\'t create object for party', RESPONSE_CODES.NOT_FOUND); }
-    party.save();
 
     // find available servers in db
     const numServersNeeded = Math.ceil(numPlayers / GAME_PLAYER_LIMITS[game]);
@@ -70,6 +71,9 @@ const createParty = async (name, game, numPlayers) => {
  */
 const joinPartyAsStudent = async (name, partyCode) => {
   try {
+    // verify that call includes all parameters
+    if (!name || !partyCode) { throw generateError('Please specify a name and party code', RESPONSE_CODES.BAD_REQUEST); }
+
     // create object for student in db
     const student = new User({
       name,

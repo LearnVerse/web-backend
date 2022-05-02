@@ -41,4 +41,5 @@ export const NO_PARTY_CODE = '0000';
 export const GAME_PLAYER_LIMITS = {
   Dino: 20,
   Space: 4,
+  TestGame: 2,
 };
