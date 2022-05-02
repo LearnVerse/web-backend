@@ -8,7 +8,7 @@ const ServerSchema = new Schema({
   maxUsers: Number,
   currUsers: Number,
   partyCode: String,
-  instructor: mongoose.Schema.Types.ObjectId,
+  instructor: Object,
   students: Array,
 }, {
   toJSON: {

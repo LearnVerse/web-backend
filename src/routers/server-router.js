@@ -37,4 +37,20 @@ router.route('/joinPartyAsStudent')
     }
   });
 
+router.route('/getAllPartyMembers')
+  .get(async (req, res) => {
+    try {
+      const { partyCode } = req.query;
+      const partyMembers = await Server.getAllPartyMembers(partyCode);
+      if (partyMembers) {
+        res.send(generateResponse(RESPONSE_TYPES.SUCCESS, partyMembers));
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(error.code.status).send(
+        generateResponse(error.code.type, error.message),
+      );
+    }
+  });
+
 export default router;

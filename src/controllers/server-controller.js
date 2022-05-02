@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Server from '../models/server-model';
 import User from '../models/user-model';
 import Party from '../models/party-model';
@@ -29,7 +30,7 @@ const createParty = async (name, game, numPlayers) => {
 
     // create object for party in db, assign instructor
     const party = new Party({
-      instructor: instructor._id,
+      instructor: { instructorName: instructor.name, instructorId: instructor._id },
       students: [],
     });
     if (!party) { throw generateError('Couldn\'t create object for party', RESPONSE_CODES.NOT_FOUND); }
@@ -47,7 +48,7 @@ const createParty = async (name, game, numPlayers) => {
     // + store server addresses in instructor and party
     partyServers.forEach((server) => {
       server.partyCode = party._id;
-      server.instructor = instructor._id;
+      server.instructor = { instructorName: instructor.name, instructorId: instructor._id };
       server.save();
       instructor.allPartyAddresses.push(server.address);
       party.addresses.push(server.address);
@@ -91,7 +92,7 @@ const joinPartyAsStudent = async (name, partyCode) => {
     if (!partyServersWithRoom || partyServersWithRoom.length === 0) { throw generateError('Party is already full', RESPONSE_CODES.NOT_FOUND); }
     const selectedServer = partyServersWithRoom[0];
     selectedServer.currUsers += 1;
-    selectedServer.students.push(student._id);
+    selectedServer.students.push({ studentName: student.name, studentId: student._id });
     selectedServer.save();
 
     // add server address to student
@@ -100,7 +101,7 @@ const joinPartyAsStudent = async (name, partyCode) => {
 
     // get party object from db and add student to it
     const party = await Party.findOne({ _id: partyCode });
-    party.students.push(student._id);
+    party.students.push({ studentName: student.name, studentId: student._id });
     party.save();
 
     // respond with server address
@@ -111,6 +112,30 @@ const joinPartyAsStudent = async (name, partyCode) => {
   }
 };
 
-const server = { createParty, joinPartyAsStudent };
+/**
+ * Takes a party code, finds the party, and returns an array of all the party members' names
+ * @param partyCode - the party code of the party you want to get the members of
+ * @returns array with names of party members
+ */
+const getAllPartyMembers = async (partyCode) => {
+  try {
+    // verify that call includes all parameters
+    if (!partyCode) { throw generateError('Please specify a party code', RESPONSE_CODES.BAD_REQUEST); }
+
+    // find party, get its instructor and all its students
+    const party = await Party.findOne({ _id: new mongoose.Types.ObjectId(partyCode) });
+    if (!party) { throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND); }
+
+    // respond with array of names
+    const studentNames = party.students.reduce((acc, student) => { return [...acc, student.studentName]; }, []);
+    const partyMembers = [party.instructor.instructorName].concat(studentNames);
+    return partyMembers;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const server = { createParty, joinPartyAsStudent, getAllPartyMembers };
 
 export default server;

@@ -37,7 +37,7 @@ let partyCode;
     else throw new Error('ERROR! Couldn\'t add Student1 to party');
 
     // Attempt to add Student1 to party; EXPECT: Error 404, 'Party is already full'
-    const student5Response = await axios.get('http://localhost:9090/server/joinPartyAsStudent', { params: { name: 'Student1', partyCode } });
+    const student5Response = await axios.get('http://localhost:9090/server/joinPartyAsStudent', { params: { name: 'Student5', partyCode } });
     if (student5Response.data.status === 404) console.log('SUCCESS! Couldn\'t add Student5 since the party is already full');
     else throw new Error('ERROR! Somehow, the student got added to a full party');
   } catch (error) {

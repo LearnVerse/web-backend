@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const PartySchema = new Schema({
-  instructor: mongoose.Schema.Types.ObjectId,
+  instructor: Object,
   students: Array,
   addresses: Array,
 }, {
