@@ -49,7 +49,7 @@ const createParty = async (name, game, numPlayers) => {
     party.save();
 
     // respond with id for party object in db
-    return party.id;
+    return { partyId: party.id, userId: instructor.id };
   } catch (error) {
     console.log(error);
     throw error;
@@ -145,8 +145,8 @@ const leavePartyAsStudent = async (studentId) => {
   }
 };
 
-const server = {
+const party = {
   createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent,
 };
 
-export default server;
+export default party;

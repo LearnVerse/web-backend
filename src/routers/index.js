@@ -1,5 +1,5 @@
-import server from './server-router';
+import party from './party-router';
 
 export default {
-  server,
+  party,
 };
