@@ -7,13 +7,10 @@ const ServerSchema = new Schema({
   game: String,
   maxUsers: Number,
   currUsers: Number,
-  partyCode: String,
-  instructor: Object,
-  students: Array,
+  partyId: String,
 }, {
-  toJSON: {
-    virtuals: true,
-  },
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 });
 
 const ServerModel = mongoose.model('Server', ServerSchema);

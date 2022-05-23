@@ -3,13 +3,10 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const PartySchema = new Schema({
-  instructor: Object,
-  students: Array,
-  addresses: Array,
+  serverIds: [String],
 }, {
-  toJSON: {
-    virtuals: true,
-  },
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 });
 
 const PartyModel = mongoose.model('Party', PartySchema);

@@ -5,13 +5,11 @@ const { Schema } = mongoose;
 const UserSchema = new Schema({
   name: String,
   instructor: Boolean,
-  partyCode: String,
-  address: String,
-  allPartyAddresses: Array,
+  partyId: String,
+  serverId: String,
 }, {
-  toJSON: {
-    virtuals: true,
-  },
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 });
 
 const UserModel = mongoose.model('User', UserSchema);

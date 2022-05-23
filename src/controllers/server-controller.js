@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import Server from '../models/server-model';
 import User from '../models/user-model';
 import Party from '../models/party-model';
@@ -8,56 +7,49 @@ import {
 
 /**
  * Create party and instructor objects in the database, assign them to each other, and allocate servers for the party
- * @param name {string} - the name of the instructor
- * @param game {string} - the game the party is playing
- * @param numPlayers {number} - the number of players in the party, must be an integer
- * @returns _id of party object in db
+ * @param {string} name - the name of the instructor
+ * @param {string} game - the game the party is playing
+ * @param {number} numPlayers - the number of players in the party, must be an integer
+ * @returns id of party object in db
  */
 const createParty = async (name, game, numPlayers) => {
   try {
     // verify that call includes all parameters
-    if (!name || !game || !numPlayers) { throw generateError('Please specify a name, game, and number of players', RESPONSE_CODES.BAD_REQUEST); }
+    if (!name || !game || !numPlayers) throw generateError('Please specify a name, game, and number of players', RESPONSE_CODES.BAD_REQUEST);
+
+    // create object for party in db
+    const party = new Party();
+    if (!party) throw generateError('Couldn\'t create object for party in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
     // create object for instructor in db
     const instructor = new User({
       name,
       instructor: true,
-      partyCode: '',
-      address: '',
-      allPartyAddresses: [],
+      partyId: party.id,
     });
-    if (!instructor) { throw generateError('Couldn\'t create object for instructor', RESPONSE_CODES.NOT_FOUND); }
-
-    // create object for party in db, assign instructor
-    const party = new Party({
-      instructor: { instructorName: instructor.name, instructorId: instructor._id },
-      students: [],
-    });
-    if (!party) { throw generateError('Couldn\'t create object for party', RESPONSE_CODES.NOT_FOUND); }
+    if (!instructor) throw generateError('Couldn\'t create object for instructor in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
     // find available servers in db
     const numServersNeeded = Math.ceil(numPlayers / GAME_PLAYER_LIMITS[game]);
-    const availableServers = await Server.find({ game, partyCode: NO_PARTY_CODE });
-    if (!availableServers) { throw generateError('Couldn\'t find servers for party', RESPONSE_CODES.NOT_FOUND); }
+    const availableServers = await Server.find({ game, partyId: NO_PARTY_CODE });
+    if (!availableServers) throw generateError('Couldn\'t find servers for party', RESPONSE_CODES.NOT_FOUND);
 
     // allocate sufficient servers or warn if unable
-    if (availableServers.length < numServersNeeded) { throw generateError('Not enough servers currently available for this party', RESPONSE_CODES.NOT_FOUND); }
+    if (availableServers.length < numServersNeeded) throw generateError('Not enough servers currently available for this party', RESPONSE_CODES.NOT_FOUND);
     const partyServers = availableServers.slice(0, numServersNeeded);
 
-    // set partyCode and instructor in each of the selected servers
-    // + store server addresses in instructor and party
+    // set partyId in each of the selected servers
+    // + store server addresses in party
     partyServers.forEach((server) => {
-      server.partyCode = party._id;
-      server.instructor = { instructorName: instructor.name, instructorId: instructor._id };
+      server.partyId = party.id;
       server.save();
-      instructor.allPartyAddresses.push(server.address);
-      party.addresses.push(server.address);
+      party.serverIds.push(server.id);
     });
     instructor.save();
     party.save();
 
     // respond with id for party object in db
-    return party._id;
+    return party.id;
   } catch (error) {
     console.log(error);
     throw error;
@@ -66,43 +58,35 @@ const createParty = async (name, game, numPlayers) => {
 
 /**
  * Create a student object in the database, assign it to a server, and add the student to the party
- * @param name {string} - the name of the student
- * @param partyCode {string} - the party code that the student is trying to join
+ * @param {string} name - the name of the student
+ * @param {string} partyId - the party code that the student is trying to join
  * @returns address of server student was assigned to
  */
-const joinPartyAsStudent = async (name, partyCode) => {
+const joinPartyAsStudent = async (name, partyId) => {
   try {
     // verify that call includes all parameters
-    if (!name || !partyCode) { throw generateError('Please specify a name and party code', RESPONSE_CODES.BAD_REQUEST); }
+    if (!name || !partyId) throw generateError('Please specify a name and party code', RESPONSE_CODES.BAD_REQUEST);
 
     // create object for student in db
     const student = new User({
       name,
       instructor: false,
-      partyCode,
-      address: '',
-      allPartyAddresses: [],
+      partyId,
     });
-    if (!student) { throw generateError('Couldn\'t create object for student', RESPONSE_CODES.NOT_FOUND); }
+    if (!student) throw generateError('Couldn\'t create object for student in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
-    // find party servers, assign student to one of them
-    const partyServers = await Server.find({ partyCode });
-    if (!partyServers) { throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND); }
+    // find party servers, select one not yet at capacity to host student
+    const partyServers = await Server.find({ partyId });
+    if (!partyServers) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
     const partyServersWithRoom = partyServers.filter((server) => { return server.maxUsers - server.currUsers > 0; });
-    if (!partyServersWithRoom || partyServersWithRoom.length === 0) { throw generateError('Party is already full', RESPONSE_CODES.NOT_FOUND); }
+    if (!partyServersWithRoom || partyServersWithRoom.length === 0) throw generateError('Party is already full', RESPONSE_CODES.NOT_FOUND);
     const selectedServer = partyServersWithRoom[0];
     selectedServer.currUsers += 1;
-    selectedServer.students.push({ studentName: student.name, studentId: student._id });
     selectedServer.save();
 
     // add server address to student
-    student.address = selectedServer.address;
+    student.serverId = selectedServer.id;
     student.save();
-
-    // get party object from db and add student to it
-    const party = await Party.findOne({ _id: partyCode });
-    party.students.push({ studentName: student.name, studentId: student._id });
-    party.save();
 
     // respond with server address
     return selectedServer.address;
@@ -113,22 +97,20 @@ const joinPartyAsStudent = async (name, partyCode) => {
 };
 
 /**
- * Takes a party code, finds the party, and returns an array of all the party members' names
- * @param partyCode - the party code of the party you want to get the members of
- * @returns array with names of party members
+ * Takes a party code, finds the party, and returns an array of all the party member objects
+ * @param partyId - the party code of the party you want to get the members of
+ * @returns array with all party members
  */
-const getAllPartyMembers = async (partyCode) => {
+const getAllPartyMembers = async (partyId) => {
   try {
     // verify that call includes all parameters
-    if (!partyCode) { throw generateError('Please specify a party code', RESPONSE_CODES.BAD_REQUEST); }
+    if (!partyId) throw generateError('Please specify a party code', RESPONSE_CODES.BAD_REQUEST);
 
-    // find party, get its instructor and all its students
-    const party = await Party.findOne({ _id: new mongoose.Types.ObjectId(partyCode) });
-    if (!party) { throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND); }
+    // find all users subscribed to party
+    const partyMembers = User.find({ partyId });
+    if (!partyMembers) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
 
-    // respond with array of names
-    const studentNames = party.students.reduce((acc, student) => { return [...acc, student.studentName]; }, []);
-    const partyMembers = [party.instructor.instructorName].concat(studentNames);
+    // respond with array of members
     return partyMembers;
   } catch (error) {
     console.log(error);
@@ -136,6 +118,35 @@ const getAllPartyMembers = async (partyCode) => {
   }
 };
 
-const server = { createParty, joinPartyAsStudent, getAllPartyMembers };
+const leavePartyAsStudent = async (studentId) => {
+  try {
+    // verify that call includes all parameters
+    if (!studentId) throw generateError('Please specify student ID', RESPONSE_CODES.BAD_REQUEST);
+
+    // find student, get its party code and server address
+    const departingStudent = await User.findById(studentId);
+    if (!departingStudent) throw generateError('Student not found', RESPONSE_CODES.NOT_FOUND);
+    const { partyId, serverId } = departingStudent;
+
+    // find server, remove student from it
+    const server = await Server.findById(serverId);
+    if (!server) throw generateError('Server not found', RESPONSE_CODES.NOT_FOUND);
+    server.currUsers -= 1;
+    server.save();
+
+    // delete student object in db
+    await User.findByIdAndDelete(studentId);
+
+    // respond with message indicating successful disconnection
+    return `Student ${studentId} disconnected successfully from party ${partyId}`;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+const server = {
+  createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent,
+};
 
 export default server;
