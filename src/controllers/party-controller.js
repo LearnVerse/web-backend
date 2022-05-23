@@ -89,7 +89,7 @@ const joinPartyAsStudent = async (name, partyId) => {
     student.save();
 
     // respond with server address
-    return selectedServer.address;
+    return { userId: student.id, address: selectedServer.address };
   } catch (error) {
     console.log(error);
     throw error;
@@ -144,6 +144,23 @@ const leavePartyAsStudent = async (studentId) => {
     throw error;
   }
 };
+
+// const getPartyInfo = async (partyId) => {
+//   try {
+//     // verify that call includes all parameters
+//     if (!partyId) throw generateError('Please specify a party ID', RESPONSE_CODES.BAD_REQUEST);
+
+//     // find party
+//     const party = await Party.findById(partyId);
+//     if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
+
+//     // respond with party object
+//     return party;
+//   } catch (error) {
+//     console.log(error);
+//     throw error;
+//   }
+// };
 
 const party = {
   createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent,

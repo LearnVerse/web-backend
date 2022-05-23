@@ -18,8 +18,8 @@ router.route('/:partyId/joinPartyAsStudent')
     try {
       const { partyId } = req.params;
       const { name } = req.body;
-      const address = await Party.joinPartyAsStudent(name, partyId);
-      if (address) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, address));
+      const { userId, address } = await Party.joinPartyAsStudent(name, partyId);
+      if (address) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, { userId, address }));
     } catch (error) { handleError(res, error); }
   });
 
@@ -45,8 +45,8 @@ router.route('/:partyId/getAllMembers')
 //   .get(async (req, res) => {
 //     try {
 //       const { partyId } = req.params;
-//       // TODO: write controller to get party's info
-//       console.log(partyId);
+//       const partyInfo = await Party.getPartyInfo(partyId);
+//       if (partyInfo) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, partyInfo));
 //     } catch (error) { handleError(res, error); }
 //   });
 
