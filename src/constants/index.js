@@ -42,8 +42,8 @@ export const RESPONSE_TYPES = {
 export const NO_PARTY_CODE = '0000';
 
 export const GAME_PLAYER_LIMITS = {
-  Evolution: 20,
-  Gravity: 4,
+  evolution: 20,
+  gravity: 4,
   TestGame: 2,
 };
 

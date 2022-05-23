@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const PartySchema = new Schema({
+  game: String,
   serverIds: [String],
 }, {
   toObject: { virtuals: true },

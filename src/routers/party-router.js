@@ -41,13 +41,13 @@ router.route('/:partyId/getAllMembers')
     } catch (error) { handleError(res, error); }
   });
 
-// router.route('/:partyId')
-//   .get(async (req, res) => {
-//     try {
-//       const { partyId } = req.params;
-//       const partyInfo = await Party.getPartyInfo(partyId);
-//       if (partyInfo) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, partyInfo));
-//     } catch (error) { handleError(res, error); }
-//   });
+router.route('/:partyId')
+  .get(async (req, res) => {
+    try {
+      const { partyId } = req.params;
+      const partyInfo = await Party.getPartyGame(partyId);
+      if (partyInfo) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, partyInfo));
+    } catch (error) { handleError(res, error); }
+  });
 
 export default router;

@@ -18,7 +18,9 @@ const createParty = async (name, game, numPlayers) => {
     if (!name || !game || !numPlayers) throw generateError('Please specify a name, game, and number of players', RESPONSE_CODES.BAD_REQUEST);
 
     // create object for party in db
-    const party = new Party();
+    const party = new Party({
+      game,
+    });
     if (!party) throw generateError('Couldn\'t create object for party in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
     // create object for instructor in db
@@ -145,25 +147,25 @@ const leavePartyAsStudent = async (studentId) => {
   }
 };
 
-// const getPartyInfo = async (partyId) => {
-//   try {
-//     // verify that call includes all parameters
-//     if (!partyId) throw generateError('Please specify a party ID', RESPONSE_CODES.BAD_REQUEST);
+const getPartyGame = async (partyId) => {
+  try {
+    // verify that call includes all parameters
+    if (!partyId) throw generateError('Please specify a party ID', RESPONSE_CODES.BAD_REQUEST);
 
-//     // find party
-//     const party = await Party.findById(partyId);
-//     if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
+    // find party
+    const party = await Party.findById(partyId);
+    if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
 
-//     // respond with party object
-//     return party;
-//   } catch (error) {
-//     console.log(error);
-//     throw error;
-//   }
-// };
+    // respond with party object
+    return party.game;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
 const party = {
-  createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent,
+  createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent, getPartyGame,
 };
 
 export default party;
