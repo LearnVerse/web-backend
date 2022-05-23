@@ -156,7 +156,7 @@ const getPartyGame = async (partyId) => {
     const party = await Party.findById(partyId);
     if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
 
-    // respond with party object
+    // respond with party game
     return party.game;
   } catch (error) {
     console.log(error);
