@@ -20,6 +20,7 @@ const createParty = async (name, game, numPlayers) => {
     // create object for party in db
     const party = new Party({
       game,
+      playing: false,
     });
     if (!party) throw generateError('Couldn\'t create object for party in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
