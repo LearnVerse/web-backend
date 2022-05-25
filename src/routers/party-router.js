@@ -45,8 +45,16 @@ router.route('/:partyId')
   .get(async (req, res) => {
     try {
       const { partyId } = req.params;
-      const partyInfo = await Party.getPartyGame(partyId);
+      const partyInfo = await Party.getPartyInfo(partyId);
       if (partyInfo) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, partyInfo));
+    } catch (error) { handleError(res, error); }
+  })
+  .patch(async (req, res) => {
+    try {
+      const { partyId } = req.params;
+      const { attribute, value } = req.body;
+      const updatedSuccessfully = await Party.setPartyAttribute(partyId, attribute, value);
+      if (updatedSuccessfully) res.send(generateResponse(RESPONSE_TYPES.SUCCESS));
     } catch (error) { handleError(res, error); }
   });
 

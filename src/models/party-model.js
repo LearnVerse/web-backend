@@ -4,6 +4,7 @@ const { Schema } = mongoose;
 
 const PartySchema = new Schema({
   game: String,
+  playing: Boolean,
   serverIds: [String],
 }, {
   toObject: { virtuals: true },

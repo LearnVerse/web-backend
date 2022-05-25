@@ -99,27 +99,11 @@ const joinPartyAsStudent = async (name, partyId) => {
 };
 
 /**
- * Takes a party code, finds the party, and returns an array of all the party member objects
- * @param partyId - the party code of the party you want to get the members of
- * @returns array with all party members
+ * Deletes a student from the database, and decrements the number of users on the server that the
+ * student was connected to
+ * @param studentId - the ID of the student who is leaving the party
+ * @returns A string indicating that the student has been disconnected from the party.
  */
-const getAllPartyMembers = async (partyId) => {
-  try {
-    // verify that call includes all parameters
-    if (!partyId) throw generateError('Please specify a party code', RESPONSE_CODES.BAD_REQUEST);
-
-    // find all users subscribed to party
-    const partyMembers = User.find({ partyId });
-    if (!partyMembers) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
-
-    // respond with array of members
-    return partyMembers;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
-
 const leavePartyAsStudent = async (studentId) => {
   try {
     // verify that call includes all parameters
@@ -147,7 +131,35 @@ const leavePartyAsStudent = async (studentId) => {
   }
 };
 
-const getPartyGame = async (partyId) => {
+/**
+ * Takes a party code, finds the party, and returns an array of all the party member objects
+ * @param partyId - the party code of the party you want to get the members of
+ * @returns array with all party members
+ */
+const getAllPartyMembers = async (partyId) => {
+  try {
+    // verify that call includes all parameters
+    if (!partyId) throw generateError('Please specify a party code', RESPONSE_CODES.BAD_REQUEST);
+
+    // find all users subscribed to party
+    const partyMembers = User.find({ partyId });
+    if (!partyMembers) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
+
+    // respond with array of members
+    return partyMembers;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+/**
+ * Takes a party ID and an attribute, finds the party, and returns the attribute
+ * @param partyId - the ID of the party you want to get the attribute of
+ * @param attribute - the attribute of the party you want to get
+ * @returns The party's attribute
+ */
+const getPartyInfo = async (partyId) => {
   try {
     // verify that call includes all parameters
     if (!partyId) throw generateError('Please specify a party ID', RESPONSE_CODES.BAD_REQUEST);
@@ -156,8 +168,37 @@ const getPartyGame = async (partyId) => {
     const party = await Party.findById(partyId);
     if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
 
-    // respond with party game
-    return party.game;
+    // respond with party attribute
+    return party;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+/**
+ * Takes a party ID and an attribute, finds the party, and updates the party's attribute with
+ * the new value
+ * @param partyId - the ID of the party to update
+ * @param attribute - the attribute of the party to update
+ * @param value - the value to set the attribute to
+ * @returns A boolean for success
+ */
+const setPartyAttribute = async (partyId, attribute, value) => {
+  try {
+    // verify that call includes all parameters
+    if (!partyId) throw generateError('Please specify a party ID', RESPONSE_CODES.BAD_REQUEST);
+
+    // find party
+    const party = await Party.findById(partyId);
+    if (!party) throw generateError('Party not found', RESPONSE_CODES.NOT_FOUND);
+
+    // update party attribute
+    party[attribute] = value;
+    await party.save();
+
+    // respond with boolean for success
+    return true;
   } catch (error) {
     console.log(error);
     throw error;
@@ -165,7 +206,7 @@ const getPartyGame = async (partyId) => {
 };
 
 const party = {
-  createParty, joinPartyAsStudent, getAllPartyMembers, leavePartyAsStudent, getPartyGame,
+  createParty, joinPartyAsStudent, leavePartyAsStudent, getAllPartyMembers, getPartyInfo, setPartyAttribute,
 };
 
 export default party;
