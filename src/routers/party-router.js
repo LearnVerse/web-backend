@@ -58,4 +58,13 @@ router.route('/:partyId')
     } catch (error) { handleError(res, error); }
   });
 
+router.route('/server/:serverId')
+  .get(async (req, res) => {
+    try {
+      const { serverId } = req.params;
+      const address = await Party.getServerAddress(serverId);
+      if (address) res.send(generateResponse(RESPONSE_TYPES.SUCCESS, address));
+    } catch (error) { handleError(res, error); }
+  });
+
 export default router;

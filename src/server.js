@@ -28,9 +28,6 @@ app.use(express.json()); // To parse the incoming requests with JSON payloads
 // database setup
 const mongoose = require('mongoose');
 
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:9090';
-mongoose.connect(mongoURI, { useNewUrlParser: true });
-
 // default index route
 app.get('/', (req, res) => {
   res.send('Welcome to LearnVerse');
@@ -43,7 +40,19 @@ Object.keys(routers).forEach((prefix) => {
 
 // START THE SERVER
 // =============================================================================
-const port = process.env.PORT || 9090;
-app.listen(port);
+async function startServer() {
+  try {
+    // connect DB
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:9090';
+    await mongoose.connect(mongoURI);
 
-console.log(`\nlistening on port ${port}`);
+    const port = process.env.PORT || 9090;
+    app.listen(port);
+
+    console.log(`Listening on port ${port}`);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+startServer();

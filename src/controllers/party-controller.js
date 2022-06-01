@@ -21,6 +21,7 @@ const createParty = async (name, game, numPlayers) => {
     const party = new Party({
       game,
       playing: false,
+      playVideo: false,
     });
     if (!party) throw generateError('Couldn\'t create object for party in the database', RESPONSE_CODES.INTERNAL_ERROR);
 
@@ -206,8 +207,25 @@ const setPartyAttribute = async (partyId, attribute, value) => {
   }
 };
 
+const getServerAddress = async (serverId) => {
+  try {
+    // verify that call includes all parameters
+    if (!serverId) throw generateError('Please specify a server ID', RESPONSE_CODES.BAD_REQUEST);
+
+    // find server
+    const server = await Server.findById(serverId);
+    if (!server) throw generateError('Server not found', RESPONSE_CODES.NOT_FOUND);
+
+    // respond with server address
+    return server.address;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 const party = {
-  createParty, joinPartyAsStudent, leavePartyAsStudent, getAllPartyMembers, getPartyInfo, setPartyAttribute,
+  createParty, joinPartyAsStudent, leavePartyAsStudent, getAllPartyMembers, getPartyInfo, setPartyAttribute, getServerAddress,
 };
 
 export default party;
