@@ -49,7 +49,7 @@ const createParty = async (name, game, numPlayers) => {
       server.partyId = party.id;
       server.save();
       party.serverIds.push(server.id);
-      addresses.push(server.id);
+      addresses.push(server.address);
     });
     instructor.save();
     party.save();
