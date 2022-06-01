@@ -43,17 +43,19 @@ const createParty = async (name, game, numPlayers) => {
     const partyServers = availableServers.slice(0, numServersNeeded);
 
     // set partyId in each of the selected servers
-    // + store server addresses in party
+    // + store server addresses in party and variable to send in response
+    const addresses = [];
     partyServers.forEach((server) => {
       server.partyId = party.id;
       server.save();
       party.serverIds.push(server.id);
+      addresses.push(server.id);
     });
     instructor.save();
     party.save();
 
     // respond with id for party object in db
-    return { partyId: party.id, userId: instructor.id };
+    return { partyId: party.id, userId: instructor.id, addresses };
   } catch (error) {
     console.log(error);
     throw error;
